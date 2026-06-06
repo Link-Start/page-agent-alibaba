@@ -1,4 +1,3 @@
-/* eslint-disable react-dom/no-dangerously-set-innerhtml */
 import type { PageAgent as PageAgentType } from 'page-agent'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'wouter'
@@ -46,10 +45,11 @@ export default function HeroSection() {
 		: 'Goto docs in navigation bar, find Quick-Start section, and summarize in markdown'
 
 	const [task, setTask] = useState(() => defaultTask)
-
-	useEffect(() => {
+	const [prevDefaultTask, setPrevDefaultTask] = useState(defaultTask)
+	if (prevDefaultTask !== defaultTask) {
+		setPrevDefaultTask(defaultTask)
 		setTask(defaultTask)
-	}, [defaultTask])
+	}
 
 	const [params] = useSearchParams()
 	const isOther = params.has('try_other')
@@ -77,9 +77,7 @@ export default function HeroSection() {
 				instructions: {
 					system: 'You are a helpful assistant on PageAgent website.',
 					getPageInstructions: (url: string) => {
-						const hint = url.includes('page-agent') ? 'This is PageAgent demo page.' : undefined
-						console.log('[instructions] getPageInstructions:', url, '->', hint)
-						return hint
+						return url.includes('page-agent') ? 'This is PageAgent demo page.' : undefined
 					},
 				},
 
@@ -98,8 +96,7 @@ export default function HeroSection() {
 			})
 		}
 
-		const result = await win.pageAgent.execute(task)
-		console.log(result)
+		await win.pageAgent.execute(task)
 	}
 
 	return (
